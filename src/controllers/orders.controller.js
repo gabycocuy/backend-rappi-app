@@ -23,7 +23,6 @@ export const createOrder = async (req, res) => {
 
     res.json(order);
   } catch (error) {
-    console.log(error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -76,6 +75,65 @@ export const acceptOrder = async (req, res) => {
       data: {
         deliveryId,
         status: "ACCEPTED",
+      },
+    });
+
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getDeliveryOrders = async (req, res) => {
+  try {
+    const { deliveryId } = req.params;
+
+    const orders = await prisma.order.findMany({
+      where: {
+        deliveryId,
+      },
+      include: {
+        items: true,
+      },
+    });
+
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getStoreOrders = async (req, res) => {
+  try {
+    const { storeId } = req.params;
+
+    const orders = await prisma.order.findMany({
+      where: {
+        storeId,
+      },
+      include: {
+        items: true,
+        consumer: true,
+      },
+    });
+
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+
+    const order = await prisma.order.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        status,
       },
     });
 
