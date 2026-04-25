@@ -5,8 +5,8 @@ import {
   getAvailableOrders,
   acceptOrder,
   getDeliveryOrders,
-  getStoreOrders,
-  updateOrderStatus,
+  updateOrderPosition,
+  getOrderById,
 } from "../controllers/orders.controller.js";
 
 import { requireRole } from "../middlewares/auth.middleware.js";
@@ -27,12 +27,12 @@ router.get(
   getDeliveryOrders,
 );
 
-router.get("/store/:storeId", requireRole(["store"]), getStoreOrders);
-
 router.patch(
-  "/:orderId/status",
-  requireRole(["store", "delivery"]),
-  updateOrderStatus,
+  "/:orderId/position",
+  requireRole(["delivery"]),
+  updateOrderPosition,
 );
+
+router.get("/:orderId", getOrderById);
 
 export default router;

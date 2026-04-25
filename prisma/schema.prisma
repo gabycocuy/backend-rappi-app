@@ -9,23 +9,21 @@ datasource db {
 
 model User {
   id       String @id @default(uuid())
-  name     String
   email    String @unique
   password String
   role     String
 
-  store  Store?
-  orders Order[]
+  store      Store[]
+  orders     Order[] @relation("UserOrders")
+  deliveries Order[] @relation("DeliveryOrders")
 }
 
 model Store {
-  id     String  @id @default(uuid())
-  name   String
-  isOpen Boolean @default(true)
-  userId String  @unique
+  id      String @id @default(uuid())
+  name    String
+  ownerId String
 
-  user User @relation(fields: [userId], references: [id])
-
+  owner    User      @relation(fields: [ownerId], references: [id])
   products Product[]
   orders   Order[]
 }
@@ -33,30 +31,40 @@ model Store {
 model Product {
   id      String @id @default(uuid())
   name    String
-  price   Int
+  price   Float
   storeId String
 
-  store Store @relation(fields: [storeId], references: [id])
-
-  items OrderItem[]
+  store Store       @relation(fields: [storeId], references: [id])
+  items OrderItem[] // 🔥 ESTA LÍNEA ARREGLA EL ERROR
 }
 
 model Order {
-  id         String   @id @default(uuid())
+  id String @id @default(uuid())
+
   consumerId String
   storeId    String
   deliveryId String?
-  status     String   @default("PENDING")
-  createdAt  DateTime @default(now())
 
-  consumer User @relation(fields: [consumerId], references: [id])
+  status String
+
+  destination_lat Float
+  destination_lng Float
+
+  delivery_lat Float?
+  delivery_lng Float?
+
+  createdAt DateTime @default(now())
+
+  consumer User  @relation("UserOrders", fields: [consumerId], references: [id])
+  delivery User? @relation("DeliveryOrders", fields: [deliveryId], references: [id])
   store    Store @relation(fields: [storeId], references: [id])
 
   items OrderItem[]
 }
 
 model OrderItem {
-  id        String @id @default(uuid())
+  id String @id @default(uuid())
+
   orderId   String
   productId String
   quantity  Int
